@@ -9,10 +9,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.Exception
 
 
 class MainViewModel : ViewModel() {
-    var resultState by mutableStateOf("");
+    var resultState by mutableStateOf("")
+        private set
+    var isLoading by mutableStateOf(false)
+        private set
 
     fun bloqueoApp() {
         Thread.sleep(5000)
@@ -21,11 +25,23 @@ class MainViewModel : ViewModel() {
 
     fun fetchData() {
         viewModelScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                delay(5000)
-                "Respuesta de la API"
+            try {
+                isLoading = true
+                llamarAPI()
+            } catch (e: Exception) {
+                println("Error: ${e.message}")
+            } finally {
+                isLoading = false
             }
-            resultState = result
         }
     }
+
+    private suspend fun llamarAPI() {
+        val result = withContext(Dispatchers.IO) {
+            delay(5000)
+            "Respuesta de la API"
+        }
+        resultState = result
+    }
+
 }
